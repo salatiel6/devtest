@@ -4,7 +4,7 @@ from src import db, Elevator, DataGenerator
 from flask import Flask, jsonify, request, make_response
 from io import StringIO
 
-elevator = Elevator()
+elevator = Elevator(db)
 app = Flask(__name__)
 
 
