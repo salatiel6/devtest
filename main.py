@@ -19,7 +19,7 @@ def generate_data():
         with app.app_context():
             db.recreate_table()
             data_generator = DataGenerator()
-            data_generator.generate()
+            data_generator.generate(db)
 
         return jsonify({'message': 'Data generated successfully'}), 200
     except Exception as e:
