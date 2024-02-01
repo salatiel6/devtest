@@ -154,3 +154,6 @@ cython_debug/
 
 *.csv
 .idea/
+/playground/
+/tests/elevator_test.db
+/elevator.db
