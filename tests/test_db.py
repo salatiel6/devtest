@@ -1,34 +1,43 @@
 import sqlite3
-import time
-
 import pytest
+
 from src import ElevatorDatabase
+from .conftest import TEST_DATABASE_PATH
 
 
 class TestDb:
     @pytest.fixture
-    def db_instance(self):
-        return ElevatorDatabase(database_path="elevator_test.db")
+    def db_instance(self) -> ElevatorDatabase:
+        """
+        The db_instance function is a helper function that returns an instance
+        of the ElevatorDatabase class. This allows us to use the same database
+        for all tests, and also allows us to easily change which database we
+        are using.
 
-    def test_create_table(self, db_instance):
+        :return: [ElevatorDatabase] An instance of the class
+        """
+        return ElevatorDatabase(TEST_DATABASE_PATH)
+
+    def test_create_table(self, db_instance: ElevatorDatabase) -> None:
+        """Create a table and verify the number of columns"""
         db_instance.create_table()
-        time.sleep(0.1)
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
             cursor.execute("PRAGMA table_info('elevator')")
             columns = cursor.fetchall()
             assert len(columns) == 4
 
-    def test_recreate_table(self, db_instance):
+    def test_recreate_table(self, db_instance: ElevatorDatabase) -> None:
+        """Recreate the table and verify the number of columns"""
         db_instance.recreate_table()
-        time.sleep(0.1)
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
             cursor.execute("PRAGMA table_info('elevator')")
             columns = cursor.fetchall()
             assert len(columns) == 4
 
-    def test_insert_call(self, db_instance):
+    def test_insert_call(self, db_instance: ElevatorDatabase) -> None:
+        """Create a table, insert a call, and verify the inserted values"""
         db_instance.create_table()
         db_instance.insert_call(1, 2, 3)
         with sqlite3.connect(db_instance.database_path) as connection:
@@ -39,13 +48,15 @@ class TestDb:
             assert result[2] == 2
             assert result[3] == 3
 
-    def test_get_last_floor(self, db_instance):
+    def test_get_last_floor(self, db_instance: ElevatorDatabase) -> None:
+        """Create a table, insert a call, and verify the last floor value"""
         db_instance.create_table()
         db_instance.insert_call(1, 2, 3)
         last_floor = db_instance.get_last_floor()
         assert last_floor == 3
 
-    def test_get_all_rows(self, db_instance):
+    def test_get_all_rows(self, db_instance: ElevatorDatabase) -> None:
+        """Create a table, insert multiple calls, and verify all rows"""
         db_instance.create_table()
 
         db_instance.insert_call(1, 2, 3)
@@ -57,6 +68,7 @@ class TestDb:
         assert len(rows) > 0
 
         for row in rows:
+            # Verify the structure and types of each row
             assert isinstance(row, tuple)
             assert len(row) == 4
             assert isinstance(row[0], int)
@@ -64,73 +76,32 @@ class TestDb:
             assert isinstance(row[2], int)
             assert isinstance(row[3], int)
 
-    def test_update_current_floor(self, db_instance):
+    def test_update_column(self, db_instance: ElevatorDatabase) -> None:
+        """
+        Create a table, insert a call, update a column,
+        and verify the update
+        """
         db_instance.create_table()
-
         db_instance.insert_call(1, 2, 3)
+        row_id = db_instance.get_all_rows()[0][0]
+
+        new_current_floor_value = 10
+        db_instance.update_column(row_id, 'current_floor',
+                                  new_current_floor_value)
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute("SELECT MAX(id) FROM elevator")
-            row_id = cursor.fetchone()[0]
+            cursor.execute("SELECT current_floor FROM elevator WHERE id = ?",
+                           (row_id,))
+            updated_value = cursor.fetchone()[0]
 
-        new_current_floor = 10
-        db_instance.update_current_floor(row_id, new_current_floor)
+        assert updated_value == new_current_floor_value
 
-        with sqlite3.connect(db_instance.database_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute(
-                f"SELECT current_floor FROM elevator WHERE id = {row_id}"
-            )
-            updated_current_floor = cursor.fetchone()[0]
-
-        assert updated_current_floor == new_current_floor
-
-    def test_update_demand_floor(self, db_instance):
-        db_instance.create_table()
-
-        db_instance.insert_call(1, 2, 3)
-
-        with sqlite3.connect(db_instance.database_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute("SELECT MAX(id) FROM elevator")
-            row_id = cursor.fetchone()[0]
-
-        new_demand_floor = 20
-        db_instance.update_demand_floor(row_id, new_demand_floor)
-
-        with sqlite3.connect(db_instance.database_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute(
-                f"SELECT demand_floor FROM elevator WHERE id = {row_id}"
-            )
-            updated_demand_floor = cursor.fetchone()[0]
-
-        assert updated_demand_floor == new_demand_floor
-
-    def test_update_destination_floor(self, db_instance):
-        db_instance.create_table()
-
-        db_instance.insert_call(1, 2, 3)
-
-        with sqlite3.connect(db_instance.database_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute("SELECT MAX(id) FROM elevator")
-            row_id = cursor.fetchone()[0]
-
-        new_destination_floor = 30
-        db_instance.update_destination_floor(row_id, new_destination_floor)
-
-        with sqlite3.connect(db_instance.database_path) as connection:
-            cursor = connection.cursor()
-            cursor.execute(
-                f"SELECT destination_floor FROM elevator WHERE id = {row_id}"
-            )
-            updated_destination_floor = cursor.fetchone()[0]
-
-        assert updated_destination_floor == new_destination_floor
-
-    def test_delete_all_rows(self, db_instance):
+    def test_delete_all_rows(self, db_instance: ElevatorDatabase) -> None:
+        """
+        Create a table, insert multiple calls, delete all rows,
+        and verify deletion
+        """
         db_instance.create_table()
 
         db_instance.insert_call(1, 2, 3)
