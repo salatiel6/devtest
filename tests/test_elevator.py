@@ -4,11 +4,8 @@ from src import Elevator, ElevatorDatabase
 
 class TestElevator:
     @pytest.fixture
-    def db_instance(self):
-        return ElevatorDatabase(database_path='elevator_test.db')
-
-    @pytest.fixture
-    def elevator_instance(self, db_instance):
+    def elevator_instance(self):
+        db_instance = ElevatorDatabase(database_path="elevator_test.db")
         db_instance.recreate_table()
 
         return Elevator(db=db_instance)

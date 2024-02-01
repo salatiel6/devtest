@@ -8,7 +8,7 @@ from src import ElevatorDatabase
 class TestDb:
     @pytest.fixture
     def db_instance(self):
-        return ElevatorDatabase(database_path='elevator_test.db')
+        return ElevatorDatabase(database_path="elevator_test.db")
 
     def test_create_table(self, db_instance):
         db_instance.create_table()
@@ -33,7 +33,7 @@ class TestDb:
         db_instance.insert_call(1, 2, 3)
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute('SELECT * FROM elevator')
+            cursor.execute("SELECT * FROM elevator")
             result = cursor.fetchone()
             assert result[1] == 1
             assert result[2] == 2
@@ -71,7 +71,7 @@ class TestDb:
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute('SELECT MAX(id) FROM elevator')
+            cursor.execute("SELECT MAX(id) FROM elevator")
             row_id = cursor.fetchone()[0]
 
         new_current_floor = 10
@@ -79,7 +79,9 @@ class TestDb:
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute(f'SELECT current_floor FROM elevator WHERE id = {row_id}')
+            cursor.execute(
+                f"SELECT current_floor FROM elevator WHERE id = {row_id}"
+            )
             updated_current_floor = cursor.fetchone()[0]
 
         assert updated_current_floor == new_current_floor
@@ -91,7 +93,7 @@ class TestDb:
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute('SELECT MAX(id) FROM elevator')
+            cursor.execute("SELECT MAX(id) FROM elevator")
             row_id = cursor.fetchone()[0]
 
         new_demand_floor = 20
@@ -99,7 +101,9 @@ class TestDb:
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute(f'SELECT demand_floor FROM elevator WHERE id = {row_id}')
+            cursor.execute(
+                f"SELECT demand_floor FROM elevator WHERE id = {row_id}"
+            )
             updated_demand_floor = cursor.fetchone()[0]
 
         assert updated_demand_floor == new_demand_floor
@@ -111,7 +115,7 @@ class TestDb:
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute('SELECT MAX(id) FROM elevator')
+            cursor.execute("SELECT MAX(id) FROM elevator")
             row_id = cursor.fetchone()[0]
 
         new_destination_floor = 30
@@ -119,7 +123,9 @@ class TestDb:
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute(f'SELECT destination_floor FROM elevator WHERE id = {row_id}')
+            cursor.execute(
+                f"SELECT destination_floor FROM elevator WHERE id = {row_id}"
+            )
             updated_destination_floor = cursor.fetchone()[0]
 
         assert updated_destination_floor == new_destination_floor
@@ -135,7 +141,7 @@ class TestDb:
 
         with sqlite3.connect(db_instance.database_path) as connection:
             cursor = connection.cursor()
-            cursor.execute('SELECT COUNT(*) FROM elevator')
+            cursor.execute("SELECT COUNT(*) FROM elevator")
             count_after_deletion = cursor.fetchone()[0]
 
         assert count_after_deletion == 0
