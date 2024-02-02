@@ -8,16 +8,12 @@
 
 # Elevator Prediction System
 
----
-
 ## Overview
 This project aims to model an elevator system and collect data that can later be used to build a prediction engine for
 determining the best floor for the elevator to rest on. The prediction engine can be based on historical demand data,
 providing insights into the likely next floor the elevator will be called from. While the primary focus is on building a
 foundation for data collection and storage, the system is designed to lay the groundwork for future machine 
 learning applications.
-
----
 
 ## Project Structure
 The project consists of several components, each serving a specific purpose:
@@ -39,8 +35,6 @@ exports.
 * Context manager handling database connections.
 * SQLite database with methods for table creation, data insertion, and updates.
 * Methods for calling the elevator and interacting with the database.
-
----
 
 ## Functionality and Endpoints
 ### ![](https://img.shields.io/badge/GET-blue) Health Check
@@ -72,19 +66,13 @@ more fields from: `current_floor`, `demand_floor`, `destination_floor`.
 * **Endpoint**: `/export-csv`
 * **Description**: Exports the data from the database into a `CSV` file.
 
----
-
 ## Database Configuration
 The system utilizes SQLite as the database backend. The `ElevatorDatabase` class in `elevator_database.py` provides 
 methods for creating tables, inserting calls, updating rows, fetching data, and more.
 
----
-
 ## Docker Configuration
 The Docker setup includes a Dockerfile specifying the Python environment and dependencies required for the project.
 The docker-compose.yml file orchestrates the services, ensuring the application runs smoothly in a containerized environment.
-
----
 
 ## How To Run
 Requirements:
