@@ -79,20 +79,20 @@ Requirements:
 * [Git](https://git-scm.com/downloads)
 * [Docker](https://www.docker.com/)
 
-1. Clone the repository  
-`https://github.com/salatiel6/devtest.git`
+1. Clone the repository:  
+`git clone https://github.com/salatiel6/devtest.git`
 
 
-2. Open the challenge directory  
-Widows/Linux:`cd devtest`  
+2. Open the challenge directory:  
+Widows/Linux: `cd devtest`  
 Mac: `open devtest`
 
 
-3. Build docker image  
+3. Build docker image:  
 `docker-compose build`
 
 
-4. Start docker container  
+4. Start docker container:  
 `docker-compose up`
 
 ## Conclusion
