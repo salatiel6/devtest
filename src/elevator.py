@@ -1,4 +1,4 @@
-from .db import ElevatorDatabase
+from .elevator_database import ElevatorDatabase
 
 
 class Elevator:

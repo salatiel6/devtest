@@ -1,12 +1,12 @@
 import os
 import json
 
-from .db import ElevatorDatabase
+from .elevator_database import ElevatorDatabase
 
 
 class DataGenerator:
     @staticmethod
-    def generate(db: ElevatorDatabase):
+    def generate(db: ElevatorDatabase) -> bool:
         """
         The generate function will load data from the JSON file and insert it
         into the database.
@@ -33,5 +33,7 @@ class DataGenerator:
                 destination_floor = travel["destination_floor"]
 
                 db.insert_call(current_floor, demand_floor, destination_floor)
+
+            return True
         else:
-            print(f"File not found: {json_path}")
+            return False
