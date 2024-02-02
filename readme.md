@@ -8,6 +8,14 @@
 
 # Elevator Prediction System
 
+- [Overview](#overview)
+- [Project Structure](#project-structure)
+- [Functionality and Endpoints](#functionality-and-endpoints)
+- [Database Configuration](#database-configuration)
+- [Docker Configuration](#docker-configuration)
+- [How To Run](#how-to-run)
+- [Conclusion](#conclusion)
+
 ## Overview
 This project aims to model an elevator system and collect data that can later be used to build a prediction engine for
 determining the best floor for the elevator to rest on. The prediction engine can be based on historical demand data,
