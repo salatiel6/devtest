@@ -1,49 +1,113 @@
-# Dev Test
+![](https://img.shields.io/badge/python-v3.11-blue)
+![](https://img.shields.io/badge/Flask-v3.0.1-pink)
+![](https://img.shields.io/badge/Docker-v24.0.5-orange)
+![](https://img.shields.io/badge/flake8--black-v0.3.6-purple)
 
-## Elevators
-When an elevator is empty and not moving this is known as it's resting floor. 
-The ideal resting floor to be positioned on depends on the likely next floor that the elevator will be called from.
+![](https://img.shields.io/badge/pytest-v8.0.0-black)
+![](https://img.shields.io/badge/coverage-97%25-brightgreen)
 
-We can build a prediction engine to predict the likely next floor based on historical demand, if we have the data.
-
-The goal of this project is to model an elevator and save the data that could later be used to build a prediction engine for which floor is the best resting floor at any time
-- When people call an elevator this is considered a demand
-- When the elevator is vacant and not moving between floors, the current floor is considered its resting floor
-- When the elevator is vacant, it can stay at the current position or move to a different floor
-- The prediction model will determine what is the best floor to rest on
-
-
-_The requirement isn't to complete this system but to start building a system that would feed into the training and prediction
-of an ML system_
-
-You will need to talk through your approach, how you modelled the data and why you thought that data was important, provide endpoints to collect the data and 
-a means to store the data. Testing is important and will be used verify your system
-
-
-#### In short
-This is a domain modeling problem to build a fit for purpose data storage with a focus on ai data ingestion
-- Model the problem into a storage schema (SQL DB schema or whatever you prefer)
-- CRUD some data
-- Add some flair with a business rule or two
-- Have the data in a suitable format to feed to a prediction training algorithm
+# Elevator Prediction System
 
 ---
 
-#### To start
-- Fork this repo and begin from there
-- For your submission, PR into the main repo. We will review it, a offer any feedback and give you a pass / fail if it passes PR
-- Don't spend more than 4 hours on this. Projects that pass PR are paid at the standard hourly rate
+## Overview
+This project aims to model an elevator system and collect data that can later be used to build a prediction engine for
+determining the best floor for the elevator to rest on. The prediction engine can be based on historical demand data,
+providing insights into the likely next floor the elevator will be called from. While the primary focus is on building a
+foundation for data collection and storage, the system is designed to lay the groundwork for future machine 
+learning applications.
 
-#### Marking
-- You will be marked on how well your tests cover the code and how useful they would be in a prod system
-- You will need to provide storage of some sort. This could be as simple as a sqlite or as complicated as a docker container with a migrations file
-- Solutions will be marked against the position you are applying for, a Snr Dev will be expected to have a nearly complete solution and to have thought out the domain and built a schema to fit any issues that could arise 
-A Jr. dev will be expected to provide a basic design and understand how ML systems like to ingest data
+---
+
+## Project Structure
+The project consists of several components, each serving a specific purpose:
+
+### API Module
+* Core module containing the main application.
+* Provides endpoints for health checks, data generation, elevator calls, data retrieval, updates, deletions, and CSV 
+exports.
+* Utilizes Flask and interacts with an SQLite database.
+
+### Docker Configuration
+* Contains files for Docker image configuration.
+* Specifies the Dockerfile with the base image, working directory, and essential setup commands.
+* Includes the docker-compose.yml file defining container configurations.
+
+### Source Module
+* Core functionality for database interaction and elevator-related operations.
+* Abstract interface defining methods for connecting to and closing the database.
+* Context manager handling database connections.
+* SQLite database with methods for table creation, data insertion, and updates.
+* Methods for calling the elevator and interacting with the database.
+
+---
+
+## Functionality and Endpoints
+### ![](https://img.shields.io/badge/GET-blue) Health Check
+* **Endpoint**: `/health`
+* **Description**: Checks the health of the API.
+
+### ![](https://img.shields.io/badge/GET-blue) Generate Data
+* **Endpoint**: `/generate-data`
+* **Description**: Generates data for the database using the DataGenerator.
+
+### ![](https://img.shields.io/badge/POST-green) Call Elevator
+* **Endpoint**: `/call-elevator`
+* **Description**: Calls the elevator from a given floor. Requires parameters `demand_floor` and `destination_floor`.
+
+### ![](https://img.shields.io/badge/GET-blue) Get All Rows
+* **Endpoint**: `/get-all-rows`
+* **Description**: Retrieves all rows from the database.
+
+###  ![](https://img.shields.io/badge/PUT-yellow) Update Row
+* **Endpoint**: `/update-row`
+* **Description**: Updates the values of a row in the database. Requires a JSON object with an `id` field and one or 
+more fields from: `current_floor`, `demand_floor`, `destination_floor`.
+
+### ![](https://img.shields.io/badge/DELETE-red) Delete All Rows
+* **Endpoint**: `/delete-all-rows`
+* **Description**: Deletes all rows from the database.
+
+### ![](https://img.shields.io/badge/GET-blue) Export CSV
+* **Endpoint**: `/export-csv`
+* **Description**: Exports the data from the database into a `CSV` file.
+
+---
+
+## Database Configuration
+The system utilizes SQLite as the database backend. The `ElevatorDatabase` class in `elevator_database.py` provides 
+methods for creating tables, inserting calls, updating rows, fetching data, and more.
+
+---
+
+## Docker Configuration
+The Docker setup includes a Dockerfile specifying the Python environment and dependencies required for the project.
+The docker-compose.yml file orchestrates the services, ensuring the application runs smoothly in a containerized environment.
+
+---
+
+## How To Run
+Requirements:
+* [Git](https://git-scm.com/downloads)
+* [Docker](https://www.docker.com/)
+
+1. Clone the repository  
+`https://github.com/salatiel6/devtest.git`
 
 
-#### Trip-ups from the past
-Below is a list of some things from previous submissions that haven't worked out
-- Built a prediction engine
-- Built a full website with bells and whistles
-- Spent more than the time allowed (you won't get bonus points for creating an intricate solution, we want a fit for purpose solution)
-- Overcomplicated the system mentally and failed to start
+2. Open the challenge directory  
+Widows/Linux:`cd devtest`  
+Mac: `open devtest`
+
+
+3. Build docker image  
+`docker-compose build`
+
+
+4. Start docker container  
+`docker-compose up`
+
+## Conclusion
+This project lays the groundwork for a more comprehensive elevator prediction system. The Flask API, coupled with an 
+SQLite database, provides a scalable foundation for collecting and storing data. Future iterations may involve 
+incorporating machine learning models for predictive analysis based on historical demand patterns.
