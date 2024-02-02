@@ -3,7 +3,7 @@ import os
 
 from unittest.mock import patch
 from flask_testing import TestCase
-from src import ElevatorDatabase
+from src import ElevatorDatabase, ElevatorColumns
 from main import app, Elevator, configure_test
 from .conftest import TEST_DATABASE_PATH
 
@@ -69,7 +69,10 @@ class TestAPI(TestCase):
         """
         Test the call elevator endpoint.
         """
-        data = {"demand_floor": 3, "destination_floor": 5}
+        data = {
+            f"{ElevatorColumns.DEMAND_FLOOR}": 3,
+            f"{ElevatorColumns.DESTINATION_FLOOR}": 5
+        }
         response = self.client.post("/call-elevator", json=data)
         data = json.loads(response.data.decode("utf-8"))
         assert response.status_code == 200
@@ -79,13 +82,14 @@ class TestAPI(TestCase):
         """
         Test the call elevator endpoint with missing parameters.
         """
-        data = {"destination_floor": 5}  # No 'demand_floor'
+        data = {f"{ElevatorColumns.DESTINATION_FLOOR}": 5}  # No 'demand_floor'
         response = self.client.post("/call-elevator", json=data)
         data = json.loads(response.data.decode("utf-8"))
         assert response.status_code == 400
         assert "error" in data
         assert (
-                "Both 'demand_floor' and 'destination_floor' are required."
+                f"Both '{ElevatorColumns.DEMAND_FLOOR}' and "
+                f"'{ElevatorColumns.DESTINATION_FLOOR}' are required."
                 in data["error"]
         )
 
@@ -94,15 +98,16 @@ class TestAPI(TestCase):
         Test the call elevator endpoint with invalid parameter type.
         """
         data = {
-            "demand_floor": "invalid",
-            "destination_floor": 5,
+            f"{ElevatorColumns.DEMAND_FLOOR}": "invalid",
+            f"{ElevatorColumns.DESTINATION_FLOOR}": 5,
         }  # 'demand_floor' is not an int
         response = self.client.post("/call-elevator", json=data)
         data = json.loads(response.data.decode("utf-8"))
         assert response.status_code == 400
         assert "error" in data
         assert (
-                "'demand_floor' and 'destination_floor' must be of type int."
+                f"'{ElevatorColumns.DEMAND_FLOOR}' and "
+                f"'{ElevatorColumns.DESTINATION_FLOOR}' must be of type int."
                 in data["error"]
         )
 
@@ -143,10 +148,10 @@ class TestAPI(TestCase):
         last_row_id = self.db.get_all_rows()[-1][0]
 
         update_data = {
-            "id": last_row_id,
-            "current_floor": 2,
-            "demand_floor": 4,
-            "destination_floor": 6,
+            f"{ElevatorColumns.ID}": last_row_id,
+            f"{ElevatorColumns.CURRENT_FLOOR}": 2,
+            f"{ElevatorColumns.DEMAND_FLOOR}": 4,
+            f"{ElevatorColumns.DESTINATION_FLOOR}": 6,
         }
 
         response = self.client.put("/update-row", json=update_data)
@@ -171,8 +176,8 @@ class TestAPI(TestCase):
         last_row_id = self.db.get_all_rows()[-1][0]
 
         update_data = {
-            "id": last_row_id,
-            "demand_floor": 6
+            f"{ElevatorColumns.ID}": last_row_id,
+            f"{ElevatorColumns.DEMAND_FLOOR}": 6
         }
 
         response = self.client.put("/update-row", json=update_data)
@@ -190,9 +195,9 @@ class TestAPI(TestCase):
         Test the update row endpoint with missing 'id' parameter.
         """
         update_data = {
-            "current_floor": 2,
-            "demand_floor": 4,
-            "destination_floor": 6,
+            f"{ElevatorColumns.CURRENT_FLOOR}": 2,
+            f"{ElevatorColumns.DEMAND_FLOOR}": 4,
+            f"{ElevatorColumns.DESTINATION_FLOOR}": 6,
         }
 
         response = self.client.put("/update-row", json=update_data)
@@ -200,17 +205,17 @@ class TestAPI(TestCase):
 
         assert response.status_code == 400
         assert "error" in data
-        assert "Missing parameter 'id'" in data["error"]
+        assert f"Missing parameter '{ElevatorColumns.ID}'" in data["error"]
 
     def test_update_row_invalid_id_type(self) -> None:
         """
         Test the update row endpoint with invalid 'id' type.
         """
         update_data = {
-            "id": "invalid_id",
-            "current_floor": 2,
-            "demand_floor": 4,
-            "destination_floor": 6,
+            f"{ElevatorColumns.ID}": "invalid_id",
+            f"{ElevatorColumns.CURRENT_FLOOR}": 2,
+            f"{ElevatorColumns.DEMAND_FLOOR}": 4,
+            f"{ElevatorColumns.DESTINATION_FLOOR}": 6,
         }
 
         response = self.client.put("/update-row", json=update_data)
@@ -218,14 +223,37 @@ class TestAPI(TestCase):
 
         assert response.status_code == 400
         assert "error" in data
-        assert "'id' must be of type int." in data["error"]
+        assert f"'{ElevatorColumns.ID}' must be of type int." in data["error"]
+
+    def test_update_row_wrong_id(self) -> None:
+        """
+        Test the update row endpoint with invalid 'id'.
+        """
+        update_data = {
+            f"{ElevatorColumns.ID}": 1234,  # Invalid 'id'
+            f"{ElevatorColumns.CURRENT_FLOOR}": 2,
+            f"{ElevatorColumns.DEMAND_FLOOR}": 4,
+            f"{ElevatorColumns.DESTINATION_FLOOR}": 6,
+        }
+
+        response = self.client.put("/update-row", json=update_data)
+        data = json.loads(response.data.decode("utf-8"))
+
+        assert response.status_code == 400
+        assert "error" in data
+        assert f"Invalid '{ElevatorColumns.ID}'" in data["error"]
 
     def test_update_row_no_valid_column(self) -> None:
         """
         Test the update row endpoint with no valid column provided.
         """
+        elevator = Elevator(db=self.db)
+        elevator.call_elevator(demand_floor=3, destination_floor=5)
+
+        last_row_id = self.db.get_all_rows()[-1][0]
+
         update_data = {
-            "id": 1,  # Valid 'id'
+            f"{ElevatorColumns.ID}": last_row_id,  # Valid 'id'
             "invalid_column": 2,  # Invalid column
         }
 
@@ -240,10 +268,14 @@ class TestAPI(TestCase):
         """
         Test the update row endpoint with invalid column type.
         """
+        elevator = Elevator(db=self.db)
+        elevator.call_elevator(demand_floor=3, destination_floor=5)
+
+        last_row_id = self.db.get_all_rows()[-1][0]
+
         update_data = {
-            "id": 1,
-            "current_floor": "invalid_type",
-            # Invalid type for 'current_floor'
+            f"{ElevatorColumns.ID}": last_row_id,
+            f"{ElevatorColumns.CURRENT_FLOOR}": "invalid_type",  # Invalid type
         }
 
         response = self.client.put("/update-row", json=update_data)
@@ -251,15 +283,21 @@ class TestAPI(TestCase):
 
         assert response.status_code == 400
         assert "error" in data
-        assert "'current_floor' must be of type int." in data["error"]
+        assert (f"'{ElevatorColumns.CURRENT_FLOOR}' "
+                f"must be of type int.") in data["error"]
 
     def test_update_row_internal_error(self) -> None:
         """
         Test the update row endpoint with simulated internal error.
         """
+        elevator = Elevator(db=self.db)
+        elevator.call_elevator(demand_floor=3, destination_floor=5)
+
+        last_row_id = self.db.get_all_rows()[-1][0]
+
         update_data = {
-            "id": 1,  # Valid 'id'
-            "current_floor": 2,
+            f"{ElevatorColumns.ID}": last_row_id,  # Valid 'id'
+            f"{ElevatorColumns.CURRENT_FLOOR}": 2,
         }
 
         # Mock a side effect that raises an exception
@@ -322,7 +360,10 @@ class TestAPI(TestCase):
         assert response.headers["Content-Type"] == "text/csv"
 
         expected_records = [
-            "id,current_floor,demand_floor,destination_floor",
+            f"{ElevatorColumns.ID},"
+            f"{ElevatorColumns.CURRENT_FLOOR},"
+            f"{ElevatorColumns.DEMAND_FLOOR},"
+            f"{ElevatorColumns.DESTINATION_FLOOR}",
             "1,3,3,5",
             "2,5,1,4",
         ]
