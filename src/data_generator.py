@@ -31,8 +31,14 @@ class DataGenerator:
                 current_floor = travel["current_floor"]
                 demand_floor = travel["demand_floor"]
                 destination_floor = travel["destination_floor"]
+                call_datetime = travel["call_datetime"]
 
-                db.insert_call(current_floor, demand_floor, destination_floor)
+                db.insert_call(
+                    current_floor,
+                    demand_floor,
+                    destination_floor,
+                    call_datetime
+                )
 
             return True
         else:

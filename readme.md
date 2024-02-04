@@ -103,6 +103,50 @@ Mac: `open devtest`
 4. Start docker container:  
 `docker-compose up`
 
+## Reporting For Prediction
+The generated CSV file serves as a comprehensive report capturing all elevator calls and movements, offering valuable
+insights that can significantly enhance the elevator prediction system. Here's how the collected data can aid the
+prediction model:
+
+### Historical Demand Analysis
+* The CSV file contains a detailed record of every elevator demand, including the originating floor and the desired
+destination.
+* Analyzing historical demand patterns helps identify peak usage times, popular floors, and recurring travel routes.
+
+### Optimal Resting Floor Identification
+* By examining which floors are frequently called, the prediction engine can determine the optimal resting floor for
+the elevator during idle periods.
+* This data aids in predicting where the elevator is most likely to be requested next, optimizing its position for
+quicker response times.
+
+### Traffic Flow Patterns
+* Understanding the traffic flow between floors over time enables the prediction model to adapt to changing usage
+patterns.
+* Recognizing trends in user movement facilitates more accurate predictions, ensuring the elevator is positioned
+strategically.
+
+### Peak Usage Hours
+* Analysis of call frequency during different hours of the day helps identify peak usage times.
+* The prediction system can adjust its strategy based on anticipated demand during specific periods, ensuring
+efficient elevator allocation.
+
+
+### Enhanced User Experience
+* Leveraging historical data enables the prediction engine to make informed decisions, leading to improved user
+experiences.
+* Users are more likely to experience reduced wait times and faster elevator arrivals as the system learns and adapts
+to usage patterns.
+
+### Data-Driven Predictive Models
+* The collected data serves as a foundation for developing data-driven predictive models.
+* Machine learning algorithms can be trained on this dataset to create a predictive model that anticipates future
+* elevator demands and optimizes the elevator's resting position.
+
+The generated CSV file acts as a powerful tool for understanding elevator usage patterns, allowing for the development
+of a robust prediction engine. By leveraging historical data, the elevator system can adapt to user behavior,
+providing a more efficient and responsive service.
+
+
 ## Conclusion
 This project lays the groundwork for a more comprehensive elevator prediction system. The Flask API, coupled with an 
 SQLite database, provides a scalable foundation for collecting and storing data. Future iterations may involve 

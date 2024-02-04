@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import datetime
 
 from unittest.mock import patch
 from flask_testing import TestCase
@@ -283,8 +284,9 @@ class TestAPI(TestCase):
 
         assert response.status_code == 400
         assert "error" in data
-        assert (f"'{ElevatorColumns.CURRENT_FLOOR}' "
-                f"must be of type int.") in data["error"]
+        assert (f"'{ElevatorColumns.CURRENT_FLOOR}' must be of type int or "
+                f"'{ElevatorColumns.CALL_DATETIME}' must be "
+                f"in the format 'YYYY-MM-DD HH:MM:SS'.") in data["error"]
 
     def test_update_row_internal_error(self) -> None:
         """
@@ -350,6 +352,12 @@ class TestAPI(TestCase):
         elevator.call_elevator(demand_floor=3, destination_floor=5)
         elevator.call_elevator(demand_floor=1, destination_floor=4)
 
+        date_str = "2024-01-01 10:00:00"
+        _date = datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+
+        self.db.update_column(1, ElevatorColumns.CALL_DATETIME, _date)
+        self.db.update_column(2, ElevatorColumns.CALL_DATETIME, _date)
+
         response = self.client.get("/export-csv")
 
         assert response.status_code == 200
@@ -363,9 +371,10 @@ class TestAPI(TestCase):
             f"{ElevatorColumns.ID},"
             f"{ElevatorColumns.CURRENT_FLOOR},"
             f"{ElevatorColumns.DEMAND_FLOOR},"
-            f"{ElevatorColumns.DESTINATION_FLOOR}",
-            "1,3,3,5",
-            "2,5,1,4",
+            f"{ElevatorColumns.DESTINATION_FLOOR},"
+            f"{ElevatorColumns.CALL_DATETIME}",
+            "1,3,3,5,2024-01-01 10:00:00",
+            "2,5,1,4,2024-01-01 10:00:00",
         ]
 
         actual_csv_content = response.data.decode("utf-8").splitlines()
