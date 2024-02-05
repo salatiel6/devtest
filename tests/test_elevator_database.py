@@ -1,6 +1,8 @@
+from datetime import datetime
+
 import pytest
 
-from src import ElevatorDatabase
+from src import ElevatorDatabase, ElevatorColumns
 from .conftest import TEST_DATABASE_PATH
 
 
@@ -17,18 +19,47 @@ class TestElevatorDatabase:
         """
         return ElevatorDatabase(TEST_DATABASE_PATH)
 
-    def test_execute_query(self, db_instance: ElevatorDatabase) -> None:
+    @pytest.fixture
+    def date_str(self) -> str:
+        """
+        Returns a string of the date in the format YYYY-MM-DD HH:MM:SS.
+
+        :return: [str] date in the format YYYY-MM-DD HH:MM:SS
+        """
+        return "2024-01-01 10:00:00"
+
+    @pytest.fixture
+    def _date(self, date_str: str) -> datetime:
+        """
+        The _date function takes a string and returns a datetime object.
+
+        :param date_str: [str]  date in the format YYYY-MM-DD HH:MM:SS.
+
+        :return: [datetime] date in the format YYYY-MM-DD HH:MM:SS.
+        """
+        return datetime.strptime(date_str, "%Y-%m-%d %H:%M:%S")
+
+    def test_execute_query(
+        self,
+        db_instance: ElevatorDatabase,
+        date_str: str,
+        _date: datetime
+    ) -> None:
         """
         Test the _execute_query method by inserting a row and checking
         if it exists.
         """
         db_instance.recreate_table()
-        query = ("""
+        query = (f"""
             INSERT INTO elevator (
-                current_floor, demand_floor, destination_floor)
-            VALUES (?, ?, ?)
+                {ElevatorColumns.CURRENT_FLOOR},
+                {ElevatorColumns.DEMAND_FLOOR},
+                {ElevatorColumns.DESTINATION_FLOOR},
+                {ElevatorColumns.CALL_DATETIME}
+            )
+            VALUES (?, ?, ?, ?)
         """)
-        parameters = (1, 2, 3)
+        parameters = (1, 2, 3, _date)
         db_instance._execute_query(query, parameters)
 
         query = "SELECT * FROM elevator"
@@ -38,13 +69,19 @@ class TestElevatorDatabase:
         assert result[1] == 1
         assert result[2] == 2
         assert result[3] == 3
+        assert result[4] == date_str
 
-    def test_fetch_one(self, db_instance: ElevatorDatabase) -> None:
+    def test_fetch_one(
+        self,
+        db_instance: ElevatorDatabase,
+        date_str: str,
+        _date: datetime
+    ) -> None:
         """
         Test the _fetch_one method by inserting a row and fetching it.
         """
         db_instance.recreate_table()
-        db_instance.insert_call(1, 2, 3)
+        db_instance.insert_call(1, 2, 3, _date)
 
         query = "SELECT * FROM elevator WHERE current_floor = ?"
         parameters = (1,)
@@ -54,6 +91,7 @@ class TestElevatorDatabase:
         assert result[1] == 1
         assert result[2] == 2
         assert result[3] == 3
+        assert result[4] == date_str
 
     def test_fetch_all(self, db_instance: ElevatorDatabase) -> None:
         """
@@ -72,31 +110,37 @@ class TestElevatorDatabase:
 
         for row in result:
             assert isinstance(row, tuple)
-            assert len(row) == 4
+            assert len(row) == 5
 
     def test_create_table(self, db_instance: ElevatorDatabase) -> None:
         """Create a table and verify the number of columns"""
         db_instance.create_table()
         query = "PRAGMA table_info('elevator')"
         columns = db_instance._fetch_all(query)
-        assert len(columns) == 4
+        assert len(columns) == 5
 
     def test_recreate_table(self, db_instance: ElevatorDatabase) -> None:
         """Recreate the table and verify the number of columns"""
         db_instance.recreate_table()
         query = "PRAGMA table_info('elevator')"
         columns = db_instance._fetch_all(query)
-        assert len(columns) == 4
+        assert len(columns) == 5
 
-    def test_insert_call(self, db_instance: ElevatorDatabase) -> None:
+    def test_insert_call(
+        self,
+        db_instance: ElevatorDatabase,
+        date_str: str,
+        _date: datetime
+    ) -> None:
         """Create a table, insert a call, and verify the inserted values"""
         db_instance.create_table()
-        db_instance.insert_call(1, 2, 3)
+        db_instance.insert_call(1, 2, 3, _date)
         query = "SELECT * FROM elevator"
         result = db_instance._fetch_one(query)
         assert result[1] == 1
         assert result[2] == 2
         assert result[3] == 3
+        assert result[4] == date_str
 
     def test_get_last_floor(self, db_instance: ElevatorDatabase) -> None:
         """Create a table, insert a call, and verify the last floor value"""
@@ -120,11 +164,12 @@ class TestElevatorDatabase:
         for row in rows:
             # Verify the structure and types of each row
             assert isinstance(row, tuple)
-            assert len(row) == 4
+            assert len(row) == 5
             assert isinstance(row[0], int)
             assert isinstance(row[1], int)
             assert isinstance(row[2], int)
             assert isinstance(row[3], int)
+            assert isinstance(row[4], str)
 
     def test_update_column(self, db_instance: ElevatorDatabase) -> None:
         """

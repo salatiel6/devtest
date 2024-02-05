@@ -1,4 +1,5 @@
 import sqlite3
+from datetime import datetime
 
 from typing import Any
 from .db_inteface import DatabaseInterface
@@ -91,10 +92,12 @@ class ElevatorDatabase(DatabaseInterface):
                     {ElevatorColumns.ID} INTEGER PRIMARY KEY AUTOINCREMENT,
                     {ElevatorColumns.CURRENT_FLOOR} INTEGER,
                     {ElevatorColumns.DEMAND_FLOOR} INTEGER,
-                    {ElevatorColumns.DESTINATION_FLOOR} INTEGER
+                    {ElevatorColumns.DESTINATION_FLOOR} INTEGER,
+                    {ElevatorColumns.CALL_DATETIME} DATETIME DEFAULT
+                        CURRENT_TIMESTAMP
                 )
             """
-        )
+        )  # noqa: W291
         self._execute_query(query)
 
     def recreate_table(self) -> None:
@@ -109,7 +112,11 @@ class ElevatorDatabase(DatabaseInterface):
         self.create_table()
 
     def insert_call(
-        self, current_floor: int, demand_floor: int, destination_floor: int
+        self,
+        current_floor: int,
+        demand_floor: int,
+        destination_floor: int,
+        call_datetime: datetime = None
     ) -> None:
         """
         The insert_call function inserts a new row into the elevator table.
@@ -118,19 +125,28 @@ class ElevatorDatabase(DatabaseInterface):
         :param current_floor:     [int] Store the current floor of the elevator
         :param demand_floor:      [int] Specify the floor that is being called
         :param destination_floor: [int] Specify the floor
+        :param call_datetime:     [datetime | None] Specify the date and time
+                                                    of the call. If None, the
+                                                    current date and time will
+                                                    be used.
 
         :return: [None]
         """
+        if call_datetime is None:
+            call_datetime = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
         query = (
             f"""
                 INSERT INTO elevator (
                     {ElevatorColumns.CURRENT_FLOOR},
                     {ElevatorColumns.DEMAND_FLOOR},
-                    {ElevatorColumns.DESTINATION_FLOOR})
-                VALUES (?, ?, ?)
+                    {ElevatorColumns.DESTINATION_FLOOR},
+                    {ElevatorColumns.CALL_DATETIME})
+                VALUES (?, ?, ?, ?)
             """
         )
-        parameters = (current_floor, demand_floor, destination_floor)
+        parameters = (
+            current_floor, demand_floor, destination_floor, call_datetime)
         self._execute_query(query, parameters)
 
     def get_last_floor(self) -> int | None:
@@ -168,7 +184,8 @@ class ElevatorDatabase(DatabaseInterface):
             SELECT {ElevatorColumns.ID},
                     {ElevatorColumns.CURRENT_FLOOR},
                     {ElevatorColumns.DEMAND_FLOOR},
-                    {ElevatorColumns.DESTINATION_FLOOR}
+                    {ElevatorColumns.DESTINATION_FLOOR},
+                    {ElevatorColumns.CALL_DATETIME}
             FROM elevator
         """
         )
@@ -177,7 +194,11 @@ class ElevatorDatabase(DatabaseInterface):
         return result
 
     def update_column(
-            self, row_id: int, column_name: str, column_value: int) -> None:
+            self,
+            row_id: int,
+            column_name: str,
+            column_value: int | datetime
+    ) -> None:
         """
         The update_column function updates a specific column in the
         elevator table.
@@ -185,7 +206,7 @@ class ElevatorDatabase(DatabaseInterface):
         :param row_id:        [int] Identify the row in the database that will
                                     be updated
         :param column_name:   [str] Name of the column to be updated
-        :param column_value:  [int] New value for the specified column
+        :param column_value:  [int|datetime] New value for the specified column
 
         :return: [None]
         """

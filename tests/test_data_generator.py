@@ -3,7 +3,7 @@ import json
 import sqlite3
 import pytest
 
-from src import DataGenerator, ElevatorDatabase
+from src import DataGenerator, ElevatorDatabase, ElevatorColumns
 from .conftest import TEST_DATABASE_PATH
 
 
@@ -49,6 +49,7 @@ class TestDataGenerator:
             rows = cursor.fetchall()
 
         for i, travel in enumerate(test_data):
-            assert rows[i][1] == travel["current_floor"]
-            assert rows[i][2] == travel["demand_floor"]
-            assert rows[i][3] == travel["destination_floor"]
+            assert rows[i][1] == travel[ElevatorColumns.CURRENT_FLOOR]
+            assert rows[i][2] == travel[ElevatorColumns.DEMAND_FLOOR]
+            assert rows[i][3] == travel[ElevatorColumns.DESTINATION_FLOOR]
+            assert rows[i][4] == travel[ElevatorColumns.CALL_DATETIME]

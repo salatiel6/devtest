@@ -1,5 +1,6 @@
 import os
 import csv
+from datetime import datetime
 
 from flask import Flask, jsonify, request, make_response
 from io import StringIO
@@ -151,6 +152,7 @@ def get_all_rows():
                     f"{ElevatorColumns.CURRENT_FLOOR}": row[1],
                     f"{ElevatorColumns.DEMAND_FLOOR}": row[2],
                     f"{ElevatorColumns.DESTINATION_FLOOR}": row[3],
+                    f"{ElevatorColumns.CALL_DATETIME}": row[4]
                 }
                 for row in rows
             ]
@@ -169,6 +171,7 @@ def update_row():
         - current_floor:     [int]
         - demand_floor:      [int]
         - destination_floor: [int]
+        - call_datetime:     [str] (in the format YYYY-MM-DD HH:MM:SS)
 
     :return: A success message with OK code if it's everything working.
              An Error BAD_REQUEST if there's some problem with the request
@@ -206,7 +209,8 @@ def update_row():
         allowed_columns = {
             f"{ElevatorColumns.CURRENT_FLOOR}",
             f"{ElevatorColumns.DEMAND_FLOOR}",
-            f"{ElevatorColumns.DESTINATION_FLOOR}"
+            f"{ElevatorColumns.DESTINATION_FLOOR}",
+            f"{ElevatorColumns.CALL_DATETIME}"
         }
 
         # Filters the columns caught on the request
@@ -215,10 +219,25 @@ def update_row():
 
         # Validate the columns types
         for column_name, column_value in update_dict.items():
-            if not isinstance(column_value, int):
+            if column_name == ElevatorColumns.CALL_DATETIME:
+                # Ensure the datetime format is correct
+                try:
+                    datetime.strptime(column_value, "%Y-%m-%d %H:%M:%S")
+                except ValueError:
+                    return (
+                        jsonify({
+                            "error": f"Invalid "
+                                     f"'{ElevatorColumns.CALL_DATETIME}' "
+                                     f"format."
+                        }),
+                        HTTPStatus.BAD_REQUEST
+                    )
+            elif not isinstance(column_value, int):
                 return (
                     jsonify({
-                        "error": f"'{column_name}' must be of type int."}),
+                        "error": f"'{column_name}' must be of type int or "
+                                 f"'{ElevatorColumns.CALL_DATETIME}' must be "
+                                 f"in the format 'YYYY-MM-DD HH:MM:SS'."}),
                     HTTPStatus.BAD_REQUEST
                 )
 
@@ -285,7 +304,8 @@ def export_csv():
                 f"{ElevatorColumns.ID}",
                 f"{ElevatorColumns.CURRENT_FLOOR}",
                 f"{ElevatorColumns.DEMAND_FLOOR}",
-                f"{ElevatorColumns.DESTINATION_FLOOR}"
+                f"{ElevatorColumns.DESTINATION_FLOOR}",
+                f"{ElevatorColumns.CALL_DATETIME}"
             ])
 
             # Write the data
