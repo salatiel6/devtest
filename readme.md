@@ -9,11 +9,13 @@
 # Elevator Prediction System
 
 - [Overview](#overview)
+- [Business Rules](#business-rules)
 - [Project Structure](#project-structure)
 - [Functionality and Endpoints](#functionality-and-endpoints)
 - [Database Configuration](#database-configuration)
 - [Docker Configuration](#docker-configuration)
 - [How To Run](#how-to-run)
+- [Reporting For Prediction](#reporting-for-prediction)
 - [Conclusion](#conclusion)
 
 ## Overview
@@ -22,6 +24,18 @@ determining the best floor for the elevator to rest on. The prediction engine ca
 providing insights into the likely next floor the elevator will be called from. While the primary focus is on building a
 foundation for data collection and storage, the system is designed to lay the groundwork for future machine 
 learning applications.
+
+## Business Rules
+
+This elevator prediction system is specifically designed for a residential context, simulating the elevator operations
+within a residential apartment building. In this context:
+
+- The first floor (floor 1) is considered the lobby or entrance area.
+- The subsequent floors represent residential apartment levels, starting from the second floor.
+
+This residential context influences the behavior of the elevator system, taking into account the typical usage patterns
+and demands within a residential setting. The system aims to optimize elevator positioning based on historical data
+generated in a residential environment.
 
 ## Project Structure
 The project consists of several components, each serving a specific purpose:
@@ -35,7 +49,7 @@ exports.
 ### Docker Configuration
 * Contains files for Docker image configuration.
 * Specifies the Dockerfile with the base image, working directory, and essential setup commands.
-* Includes the docker-compose.yml file defining container configurations.
+* Includes the [docker-compose.yml](docker-compose.yml) file defining container configurations.
 
 ### Source Module
 * Core functionality for database interaction and elevator-related operations.
@@ -75,12 +89,12 @@ more fields from: `current_floor`, `demand_floor`, `destination_floor`.
 * **Description**: Exports the data from the database into a `CSV` file.
 
 ## Database Configuration
-The system utilizes SQLite as the database backend. The `ElevatorDatabase` class in `elevator_database.py` provides 
+The system utilizes SQLite as the database backend. The `ElevatorDatabase` class in [elevator_database.py](src/elevator_database.py) provides 
 methods for creating tables, inserting calls, updating rows, fetching data, and more.
 
 ## Docker Configuration
 The Docker setup includes a Dockerfile specifying the Python environment and dependencies required for the project.
-The docker-compose.yml file orchestrates the services, ensuring the application runs smoothly in a containerized environment.
+The [docker-compose.yml](docker-compose.yml) file orchestrates the services, ensuring the application runs smoothly in a containerized environment.
 
 ## How To Run
 Requirements:
